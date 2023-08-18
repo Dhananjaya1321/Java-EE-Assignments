@@ -1,6 +1,9 @@
 package lk.ijse.jsp.servlet;
 
 
+import com.google.gson.Gson;
+import lk.ijse.jsp.dto.ItemDTO;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
@@ -9,6 +12,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.*;
 
@@ -100,20 +104,6 @@ public class ItemServlet extends HttpServlet {
                         resp.getWriter().print(objectBuilder.build());
                     }
                     break;
-                case "update":
-                    PreparedStatement pstm3 = connection.prepareStatement("update Item set description=?,qtyOnHand=?,unitPrice=? where code=?");
-                    pstm3.setObject(1, itemName);
-                    pstm3.setObject(2, qty);
-                    pstm3.setObject(3, unitPrice);
-                    pstm3.setObject(4, code);
-                    if (pstm3.executeUpdate() > 0) {
-                        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                        objectBuilder.add("state", "Ok");
-                        objectBuilder.add("message", "Successfully Updated...!");
-                        objectBuilder.add("data", "[]");
-                        resp.getWriter().print(objectBuilder.build());
-                    }
-                    break;
             }
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -125,6 +115,56 @@ public class ItemServlet extends HttpServlet {
             objectBuilder.add("data", "[]");
             resp.setStatus(400);
             resp.getWriter().print(objectBuilder.build());
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+
+            resp.setContentType("application/json");
+            // Read the JSON data from the request's input stream
+            BufferedReader reader = req.getReader();
+            StringBuilder requestData = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                requestData.append(line);
+            }
+
+            // Parse JSON data into Java object using Gson
+            Gson gson = new Gson();
+            ItemDTO updatedItem = gson.fromJson(requestData.toString(), ItemDTO.class);
+
+            // Now you can access the fields of the updatedItem object
+            String code = updatedItem.getCode();
+            String itemName = updatedItem.getName();
+            String qty = updatedItem.getQty();
+            String unitPrice = updatedItem.getPrice();
+
+
+            PreparedStatement pstm3 = connection.prepareStatement("update Item set description=?,qtyOnHand=?,unitPrice=? where code=?");
+            pstm3.setObject(1, itemName);
+            pstm3.setObject(2, Integer.parseInt(qty));
+            pstm3.setObject(3, Double.parseDouble(unitPrice));
+            pstm3.setObject(4, code);
+            if (pstm3.executeUpdate() > 0) {
+                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                objectBuilder.add("state", "Ok");
+                objectBuilder.add("message", "Successfully Updated...!");
+                objectBuilder.add("data", "[]");
+                resp.getWriter().print(objectBuilder.build());
+            }
+        }  catch (Exception e) {
+            resp.addHeader("Content-Type", "application/json");
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("state", "Error");
+            objectBuilder.add("message", e.getMessage());
+            objectBuilder.add("data", "[]");
+            resp.setStatus(400);
+            resp.getWriter().print(objectBuilder.build());
+            System.out.println(e.getMessage());
         }
     }
 }

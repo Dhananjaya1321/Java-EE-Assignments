@@ -23,7 +23,7 @@
         <li class="list-group-item bg-white" id="lnkCustomer"><a href="customer.html">Customer</a></li>
         <li class="list-group-item bg-danger text-white" id="lnkItem"><a class="text-white" href="item.html">Item</a>
         </li>
-        <li class="list-group-item bg-white" id="lnkOrders"><a href="purchase-order.jsp">Orders</a></li>
+        <li class="list-group-item bg-white" id="lnkOrders"><a href="purchase-order.html">Orders</a></li>
     </ul>
 </header>
 
@@ -135,21 +135,33 @@
         })
     });
     $("#btnItemUpdate").click(function () {
-        let formData = $("#itemForm").serialize();
+       let code=$("#itemCode").val();
+       let name=$("#itemName").val();
+       let qty=$("#itemQty").val();
+       let price=$("#itemPrice").val();
+       let data={
+           "code":code,
+           "name":name,
+           "qty":qty,
+           "price":price
+       };
         $.ajax({
-            url: "item?option=update",
-            method: "post",
-            data: formData,
+            url: "item",
+            method: "PUT",
+            contentType: "application/json",
+            data: JSON.stringify(data),
             success: function (res) {
                 getAllItems();
                 alert(
-                    res.message,
+                    res.message
                 );
             },
             error: function (error) {
+                console.log(error.responseJSON,error.responseJSON.message)
+
                 alert(error.responseJSON.message);
             }
-        })
+        });
     });
     $("#btnItemDelete").click(function () {
         let formData = $("#itemForm").serialize();
