@@ -33,17 +33,17 @@ public class ItemServlet extends HttpServlet {
                 int qtyOnHand = rst.getInt(3);
                 double unitPrice = rst.getDouble(4);
                 JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                objectBuilder.add("code",code);
-                objectBuilder.add("name",name);
-                objectBuilder.add("qtyOnHand",qtyOnHand);
-                objectBuilder.add("unitPrice",unitPrice);
+                objectBuilder.add("code", code);
+                objectBuilder.add("name", name);
+                objectBuilder.add("qtyOnHand", qtyOnHand);
+                objectBuilder.add("unitPrice", unitPrice);
                 arrayBuilder.add(objectBuilder.build());
             }
             arrayBuilder.add(
                     Json.createObjectBuilder()
-                    .add("state","Ok")
-                    .add("message","Successfully loaded..!")
-                    .add("data","[]")
+                            .add("state", "Ok")
+                            .add("message", "Successfully loaded..!")
+                            .add("data", "[]")
             );
 
             resp.getWriter().print(arrayBuilder.build());
@@ -52,9 +52,9 @@ public class ItemServlet extends HttpServlet {
             throw new RuntimeException(e);
         } catch (SQLException e) {
             JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            objectBuilder.add("state","Error");
-            objectBuilder.add("message",e.getMessage());
-            objectBuilder.add("data","[]");
+            objectBuilder.add("state", "Error");
+            objectBuilder.add("message", e.getMessage());
+            objectBuilder.add("data", "[]");
             resp.setStatus(400);
             resp.getWriter().print(objectBuilder.build());
         }
@@ -69,7 +69,8 @@ public class ItemServlet extends HttpServlet {
         String qty = req.getParameter("qty");
         String unitPrice = req.getParameter("unitPrice");
         String option = req.getParameter("option");
-//
+        resp.addHeader("Content-Type", "application/json");
+
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
@@ -81,16 +82,22 @@ public class ItemServlet extends HttpServlet {
                     pstm.setObject(3, qty);
                     pstm.setObject(4, unitPrice);
                     if (pstm.executeUpdate() > 0) {
-                        resp.getWriter().println("Item Added..!");
-                        resp.sendRedirect("item");
+                        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                        objectBuilder.add("state", "Ok");
+                        objectBuilder.add("message", "Successfully Added...!");
+                        objectBuilder.add("data", "[]");
+                        resp.getWriter().print(objectBuilder.build());
                     }
                     break;
                 case "delete":
                     PreparedStatement pstm2 = connection.prepareStatement("delete from Item where code=?");
                     pstm2.setObject(1, code);
                     if (pstm2.executeUpdate() > 0) {
-                        resp.getWriter().println("Item Deleted..!");
-                        resp.sendRedirect("/jsonp/pages/item.html");
+                        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                        objectBuilder.add("state", "Ok");
+                        objectBuilder.add("message", "Successfully Deleted...!");
+                        objectBuilder.add("data", "[]");
+                        resp.getWriter().print(objectBuilder.build());
                     }
                     break;
                 case "update":
@@ -100,15 +107,24 @@ public class ItemServlet extends HttpServlet {
                     pstm3.setObject(3, unitPrice);
                     pstm3.setObject(4, code);
                     if (pstm3.executeUpdate() > 0) {
-                        resp.getWriter().println("Item Updated..!");
-                        resp.sendRedirect("/jsonp/pages/item.html");
+                        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                        objectBuilder.add("state", "Ok");
+                        objectBuilder.add("message", "Successfully Updated...!");
+                        objectBuilder.add("data", "[]");
+                        resp.getWriter().print(objectBuilder.build());
                     }
                     break;
             }
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            resp.addHeader("Content-Type", "application/json");
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("state", "Error");
+            objectBuilder.add("message", e.getMessage());
+            objectBuilder.add("data", "[]");
+            resp.setStatus(400);
+            resp.getWriter().print(objectBuilder.build());
         }
     }
 }

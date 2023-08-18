@@ -116,6 +116,60 @@
     $("#btnGetAll").click(function () {
         getAllItems() ;
     });
+    $("#btnItem").click(function () {
+        let formData = $("#itemForm").serialize();
+        $.ajax({
+            url: "item?option=add",
+            method: "post",
+            data: formData,
+            success: function (res) {
+                console.log(res);
+                getAllItems();
+                alert(
+                    res.message,
+                );
+            },
+            error: function (error) {
+                alert(error.responseJSON.message);
+            }
+        })
+    });
+    $("#btnItemUpdate").click(function () {
+        let formData = $("#itemForm").serialize();
+        $.ajax({
+            url: "item?option=update",
+            method: "post",
+            data: formData,
+            success: function (res) {
+                getAllItems();
+                alert(
+                    res.message,
+                );
+            },
+            error: function (error) {
+                alert(error.responseJSON.message);
+            }
+        })
+    });
+    $("#btnItemDelete").click(function () {
+        let formData = $("#itemForm").serialize();
+        $.ajax({
+            url: "item?option=delete",
+            method: "post",
+            data: formData,
+            success: function (res) {
+                getAllItems();
+                alert(
+                    res.message,
+                );
+            },
+            error: function (error) {
+                alert(error.responseJSON.message);
+            }
+        })
+
+    });
+
 </script>
 </body>
 </html>
