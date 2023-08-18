@@ -54,16 +54,16 @@
                     <span class="control-error" id="lblprice"></span>
                 </div>
                 <div class="btn-group">
-                    <button form="itemForm" formmethod="post" formaction="item?option=add" class="btn btn-primary"
+                    <button form="itemForm" type="button" class="btn btn-primary"
                             id="btnItem">Add Item
                     </button>
-                    <button form="itemForm" formmethod="post" formaction="item?option=delete" class="btn btn-danger"
+                    <button form="itemForm" type="button" class="btn btn-danger"
                             id="btnItemDelete">Remove
                     </button>
-                    <button form="itemForm" formmethod="post" formaction="item?option=update" class="btn btn-warning"
+                    <button form="itemForm" type="button" class="btn btn-warning"
                             id="btnItemUpdate">Update
                     </button>
-                    <button form="itemForm" type="button" id="getAll" class="btn btn-success">Get All</button>
+                    <button form="itemForm" type="button" id="btnGetAll" class="btn btn-success">Get All</button>
                     <button form="itemForm" type="reset" class="btn btn-danger" id="btn-clear">Clear All</button>
                 </div>
             </form>
@@ -88,24 +88,33 @@
     </section>
 
 </main>
+<script src="../assets/js/jquery-3.7.0.min.js"></script>
 <script>
-    $("#getAll").click(function () {
+    function getAllItems() {
         $.ajax({
             url: "item",
             success: function (item) {
+                $("#tblItem").empty();
+                alert(item[item.length-1].message);
+                item.pop();
                 for (let i in item) {
-                    let item = item[i];
-                    let code = item.code;
-                    let name = item.name;
-                    let qtyOnHand = item.qtyOnHand;
-                    let unitPrice = item.unitPrice;
-                    console.log(item)
+                    let itm = item[i];
+                    let code = itm.code;
+                    let name = itm.name;
+                    let qtyOnHand = itm.qtyOnHand;
+                    let unitPrice = itm.unitPrice;
                     let row = `<tr><td>${code}</td><td>${name}</td><td>${qtyOnHand}</td><td>${unitPrice}</td></tr>`;
                     $("#tblItem").append(row);
-
                 }
+            },
+            error:function (error) {
+                alert(error.responseJSON.message);
             }
-        })
+        });
+    }
+
+    $("#btnGetAll").click(function () {
+        getAllItems() ;
     });
 </script>
 </body>

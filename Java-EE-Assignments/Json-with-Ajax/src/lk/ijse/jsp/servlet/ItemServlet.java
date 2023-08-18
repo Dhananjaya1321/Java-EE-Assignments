@@ -1,6 +1,9 @@
 package lk.ijse.jsp.servlet;
 
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -17,39 +20,43 @@ public class ItemServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "sanu1234");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
             PreparedStatement pstm = connection.prepareStatement("select * from Item");
             ResultSet rst = pstm.executeQuery();
 
             resp.addHeader("Content-Type", "application/json");
 
-            String jSon = "[";
+            JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             while (rst.next()) {
-                String item = "{";
                 String code = rst.getString(1);
                 String name = rst.getString(2);
                 int qtyOnHand = rst.getInt(3);
                 double unitPrice = rst.getDouble(4);
-                item += "\"code\":\"" + code + "\",";
-                item += "\"name\":\"" + name + "\",";
-                item += "\"qtyOnHand\":\"" + qtyOnHand + "\",";
-                item += "\"unitPrice\":\"" + unitPrice + "\"";
-                item += "},";
-                jSon += item;
+                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+                objectBuilder.add("code",code);
+                objectBuilder.add("name",name);
+                objectBuilder.add("qtyOnHand",qtyOnHand);
+                objectBuilder.add("unitPrice",unitPrice);
+                arrayBuilder.add(objectBuilder.build());
             }
-            jSon = jSon + "]";
+            arrayBuilder.add(
+                    Json.createObjectBuilder()
+                    .add("state","Ok")
+                    .add("message","Successfully loaded..!")
+                    .add("data","[]")
+            );
 
-            resp.getWriter().print(jSon.substring(0, jSon.length() - 2) + "]");
-
-
-            /*req.setAttribute("keyTwo", allItems);
-
-            req.getRequestDispatcher("item.html").forward(req, resp);*/
+            resp.getWriter().print(arrayBuilder.build());
 
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("state","Error");
+            objectBuilder.add("message",e.getMessage());
+            objectBuilder.add("data","[]");
+            resp.setStatus(400);
+            resp.getWriter().print(objectBuilder.build());
         }
 
     }
@@ -65,7 +72,7 @@ public class ItemServlet extends HttpServlet {
 //
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "sanu1234");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
             switch (option) {
                 case "add":
                     PreparedStatement pstm = connection.prepareStatement("insert into Item values(?,?,?,?)");

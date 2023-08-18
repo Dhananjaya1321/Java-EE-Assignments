@@ -97,34 +97,33 @@
         $.ajax({
             url: "customer",
             success: function (customer) {
+                $("#tblCustomer").empty();
+                alert(customer[customer.length-1].message);
+                customer.pop();
                 for (let c in customer) {
                     let cus = customer[c];
                     let id = cus.id;
                     let name = cus.name;
                     let address = cus.address;
-
                     let row = `<tr><td>${id}</td><td>${name}</td><td>${address}</td></tr>`;
                     $("#tblCustomer").append(row);
-
                 }
+            },
+            error: function (error) {
+                alert(error.responseJSON.message);
             }
-        })
+        });
     }
 
     $("#btnGetAll").click(function () {
         getAll();
     });
     $("#btnCustomer").click(function () {
-        /*let id = $("#txtCustomerID").val();
-        let name = $("#txtCustomerName").val();
-        let address = $("#txtCustomerAddress").val();
-        let salary = $("#txtCustomerSalary").val();*/
         let formData = $("#cusForm").serialize();
         $.ajax({
             url: "customer?option=add",
-            // url: "customer?cusID=" + id + "&cusName=" + name + "&cusAddress=" + address + "&cusSalary=" + salary + "option=add",
             method: "post",
-            data: formData/*query string widihat yawanwt wda meka lesi*/,
+            data: formData,
             success: function (res) {
                 console.log(res);
                 getAll();

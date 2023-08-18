@@ -30,27 +30,29 @@ public class CustomerServlet extends HttpServlet {
                 String id = rst.getString(1);
                 String name = rst.getString(2);
                 String address = rst.getString(3);
-
                 JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
                 objectBuilder.add("id", id);
                 objectBuilder.add("name", name);
                 objectBuilder.add("address", address);
-
                 arrayBuilder.add(objectBuilder.build());
-
             }
-
+            arrayBuilder.add(
+                    Json.createObjectBuilder()
+                            .add("state","Ok")
+                            .add("message","Successfully loaded..!")
+                            .add("data","[]")
+            );
             resp.getWriter().print(arrayBuilder.build());
-
-
-           /* req.setAttribute("keyOne", allCustomers);
-            req.getRequestDispatcher("customer.html").forward(req, resp);*/
-
-
-        } catch (ClassNotFoundException | SQLException e) {
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
+        } catch (SQLException e) {
+            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
+            objectBuilder.add("state", "Error");
+            objectBuilder.add("message", e.getMessage());
+            objectBuilder.add("data", "[]");
+            resp.setStatus(400);
+            resp.getWriter().print(objectBuilder.build());
         }
-
     }
 
     @Override
@@ -105,8 +107,6 @@ public class CustomerServlet extends HttpServlet {
                     }
                     break;
             }
-
-//            resp.sendRedirect("/jsonp/pages/customer");
 
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
