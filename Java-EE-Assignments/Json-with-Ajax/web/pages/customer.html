@@ -138,15 +138,23 @@
         })
     });
     $("#btnUpdate").click(function () {
-        let formData = $("#cusForm").serialize();
+        let id=$("#txtCustomerID").val();
+        let name=$("#txtCustomerName").val();
+        let address=$("#txtCustomerAddress").val();
+        let data={
+            "id" : id,
+            "name" : name,
+            "address" : address
+        }
         $.ajax({
-            url: "customer?option=update",
-            method: "post",
-            data: formData,
+            url: "customer",
+            method: "PUT",
+            candidateType:"application/json",
+            data: JSON.stringify(data),
             success: function (res) {
                 getAll();
                 alert(
-                    res.message,
+                    res.message
                 );
             },
             error: function (res) {
