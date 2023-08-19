@@ -36,12 +36,14 @@ public class ItemServlet extends HttpServlet {
                 String name = rst.getString(2);
                 int qtyOnHand = rst.getInt(3);
                 double unitPrice = rst.getDouble(4);
-                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                objectBuilder.add("code", code);
-                objectBuilder.add("name", name);
-                objectBuilder.add("qtyOnHand", qtyOnHand);
-                objectBuilder.add("unitPrice", unitPrice);
-                arrayBuilder.add(objectBuilder.build());
+                arrayBuilder.add(
+                        Json.createObjectBuilder()
+                                .add("code", code)
+                                .add("name", name)
+                                .add("qtyOnHand", qtyOnHand)
+                                .add("unitPrice", unitPrice)
+                                .build()
+                );
             }
             arrayBuilder.add(
                     Json.createObjectBuilder()
@@ -55,14 +57,15 @@ public class ItemServlet extends HttpServlet {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (SQLException e) {
-            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            objectBuilder.add("state", "Error");
-            objectBuilder.add("message", e.getMessage());
-            objectBuilder.add("data", "[]");
             resp.setStatus(400);
-            resp.getWriter().print(objectBuilder.build());
+            resp.getWriter().print(
+                    Json.createObjectBuilder()
+                            .add("state", "Error")
+                            .add("message", e.getMessage())
+                            .add("data", "[]")
+                            .build()
+            );
         }
-
     }
 
     @Override
@@ -78,43 +81,34 @@ public class ItemServlet extends HttpServlet {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
-            switch (option) {
-                case "add":
-                    PreparedStatement pstm = connection.prepareStatement("insert into Item values(?,?,?,?)");
-                    pstm.setObject(1, code);
-                    pstm.setObject(2, itemName);
-                    pstm.setObject(3, qty);
-                    pstm.setObject(4, unitPrice);
-                    if (pstm.executeUpdate() > 0) {
-                        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                        objectBuilder.add("state", "Ok");
-                        objectBuilder.add("message", "Successfully Added...!");
-                        objectBuilder.add("data", "[]");
-                        resp.getWriter().print(objectBuilder.build());
-                    }
-                    break;
-                case "delete":
-                    PreparedStatement pstm2 = connection.prepareStatement("delete from Item where code=?");
-                    pstm2.setObject(1, code);
-                    if (pstm2.executeUpdate() > 0) {
-                        JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                        objectBuilder.add("state", "Ok");
-                        objectBuilder.add("message", "Successfully Deleted...!");
-                        objectBuilder.add("data", "[]");
-                        resp.getWriter().print(objectBuilder.build());
-                    }
-                    break;
+
+            PreparedStatement pstm = connection.prepareStatement("insert into Item values(?,?,?,?)");
+            pstm.setObject(1, code);
+            pstm.setObject(2, itemName);
+            pstm.setObject(3, qty);
+            pstm.setObject(4, unitPrice);
+            if (pstm.executeUpdate() > 0) {
+                resp.getWriter().print(
+                        Json.createObjectBuilder()
+                                .add("state", "Ok")
+                                .add("message", "Successfully Added...!")
+                                .add("data", "[]")
+                                .build()
+                );
             }
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } catch (SQLException e) {
             resp.addHeader("Content-Type", "application/json");
-            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            objectBuilder.add("state", "Error");
-            objectBuilder.add("message", e.getMessage());
-            objectBuilder.add("data", "[]");
+
             resp.setStatus(400);
-            resp.getWriter().print(objectBuilder.build());
+            resp.getWriter().print(
+                    Json.createObjectBuilder()
+                            .add("state", "Error")
+                            .add("message", e.getMessage())
+                            .add("data", "[]")
+                            .build()
+            );
         }
     }
 
@@ -150,21 +144,59 @@ public class ItemServlet extends HttpServlet {
             pstm3.setObject(3, Double.parseDouble(unitPrice));
             pstm3.setObject(4, code);
             if (pstm3.executeUpdate() > 0) {
-                JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-                objectBuilder.add("state", "Ok");
-                objectBuilder.add("message", "Successfully Updated...!");
-                objectBuilder.add("data", "[]");
-                resp.getWriter().print(objectBuilder.build());
+                resp.getWriter().print(
+                        Json.createObjectBuilder()
+                                .add("state", "Ok")
+                                .add("message", "Successfully Updated...!")
+                                .add("data", "[]")
+                                .build()
+                );
             }
-        }  catch (Exception e) {
+        } catch (Exception e) {
             resp.addHeader("Content-Type", "application/json");
-            JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-            objectBuilder.add("state", "Error");
-            objectBuilder.add("message", e.getMessage());
-            objectBuilder.add("data", "[]");
             resp.setStatus(400);
-            resp.getWriter().print(objectBuilder.build());
-            System.out.println(e.getMessage());
+            resp.getWriter().print(
+                    Json.createObjectBuilder()
+                            .add("state", "Error")
+                            .add("message", e.getMessage())
+                            .add("data", "[]")
+                            .build()
+            );
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/company", "root", "1234");
+            resp.addHeader("Content-Type", "application/json");
+
+            String code = req.getParameter("code");
+
+            PreparedStatement pstm2 = connection.prepareStatement("delete from Item where code=?");
+            pstm2.setObject(1, code);
+            if (pstm2.executeUpdate() > 0) {
+                resp.getWriter().print(
+                        Json.createObjectBuilder()
+                                .add("state", "Ok")
+                                .add("message", "Successfully Deleted...!")
+                                .add("data", "[]")
+                                .build()
+                );
+            }
+        } catch (ClassNotFoundException exception) {
+            exception.printStackTrace();
+        } catch (SQLException e) {
+            resp.addHeader("Content-Type", "application/json");
+            resp.setStatus(400);
+            resp.getWriter().print(
+                    Json.createObjectBuilder()
+                            .add("state", "Error")
+                            .add("message", e.getMessage())
+                            .add("data", "[]")
+                            .build()
+            );
         }
     }
 }

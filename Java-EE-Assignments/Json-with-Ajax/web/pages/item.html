@@ -21,8 +21,7 @@
     <ul class="list-group list-group-horizontal text-danger justify-content-end font-weight-bold">
         <li class="list-group-item bg-white" id="lnkHome"><a href="../index.jsp">Home</a></li>
         <li class="list-group-item bg-white" id="lnkCustomer"><a href="customer.html">Customer</a></li>
-        <li class="list-group-item bg-danger text-white" id="lnkItem"><a class="text-white" href="item.html">Item</a>
-        </li>
+        <li class="list-group-item bg-white" id="lnkItem"><a href="item.html">Item</a></li>
         <li class="list-group-item bg-white" id="lnkOrders"><a href="purchase-order.html">Orders</a></li>
     </ul>
 </header>
@@ -164,22 +163,20 @@
         });
     });
     $("#btnItemDelete").click(function () {
-        let formData = $("#itemForm").serialize();
+        let code=$("#itemCode").val();
         $.ajax({
-            url: "item?option=delete",
-            method: "post",
-            data: formData,
+            url: "item?code="+code,
+            method: "DELETE",
             success: function (res) {
                 getAllItems();
                 alert(
                     res.message,
                 );
             },
-            error: function (error) {
-                alert(error.responseJSON.message);
+            error: function (res) {
+                alert(res.responseJSON.message);
             }
         })
-
     });
 
 </script>
